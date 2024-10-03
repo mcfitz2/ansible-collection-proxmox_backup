@@ -1,9 +1,8 @@
 #!/usr/bin/python
 
 from ansible.module_utils.basic import AnsibleModule
-import requests
-import json
-from proxmoxer import ProxmoxAPI
+from proxmoxer import ProxmoxAPI, ResourceException
+
 __metaclass__ = type
 
 DOCUMENTATION = r'''
@@ -50,7 +49,7 @@ options:
         required: true
         type: str
 
-requirements: [ "proxmoxer", "requests" ]
+requirements: [ "proxmoxer" ]
 
 author:
     - Micah Fitzgerald (@mcfitz2)
@@ -125,7 +124,10 @@ def main():
     node = module.params['node']
     vmid = module.params['vmid']
     wait = module.params['wait']
-    proxmox = ProxmoxAPI(module.params['api_host'], user=module.params['api_user'], password=module.params['api_password'], verify_ssl=module.params['verify_ssl'])
+    proxmox = ProxmoxAPI(module.params['api_host'],
+                         user=module.params['api_user'],
+                         password=module.params['api_password'],
+                         verify_ssl=module.params['verify_ssl'])
 
     try:
 
@@ -135,11 +137,10 @@ def main():
             status = proxmox.nodes(node).tasks(task_id).status.get()
             while status['status'] == 'running':
                 status = proxmox.nodes(node).tasks(task_id).status.get()
-                
         module.exit_json(changed=False, task_id=task_id, status=status)
 
-    except Exception as e:
-        module.fail_json(msg=f"An unexpected error occurred: {str(e)}")
+    except ResourceException as e:
+        module.fail_json(msg=f"A Proxmox error occurred: {str(e)}")
 
 if __name__ == '__main__':
     main()
