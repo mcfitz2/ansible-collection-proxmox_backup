@@ -109,9 +109,23 @@ tags:
 '''
 
 from ansible.module_utils.basic import AnsibleModule
-#from proxmoxer import ProxmoxAPI, ResourceException
+import traceback
+
+PROXMOXER_IMP_ERR = None
+try:
+    from proxmoxer import ProxmoxAPI
+    from proxmoxer import ResourceException
+    from proxmoxer import __version__ as proxmoxer_version
+    HAS_PROXMOXER = True
+except ImportError:
+    HAS_PROXMOXER = False
+    PROXMOXER_IMP_ERR = traceback.format_exc()
+
+from ansible.module_utils.basic import missing_required_lib
 
 def main():
+    if not HAS_PROXMOXER:
+            module.fail_json(msg=missing_required_lib('proxmoxer'), exception=PROXMOXER_IMP_ERR)
     module = AnsibleModule(
         argument_spec=dict(
             api_host=dict(type='str', required=True),
