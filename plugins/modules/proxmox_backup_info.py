@@ -2,9 +2,6 @@
 # Copyright: (c) 2020, Fuochi <devopsarr@gmail.com>
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 from __future__ import (absolute_import, division, print_function)
-from ansible.module_utils.basic import missing_required_lib
-import traceback
-from ansible.module_utils.basic import AnsibleModule
 
 __metaclass__ = type
 
@@ -92,7 +89,9 @@ backups:
     type: list
 '''
 
-
+from ansible.module_utils.basic import missing_required_lib
+import traceback
+from ansible.module_utils.basic import AnsibleModule
 PROXMOXER_IMP_ERR = None
 try:
     from proxmoxer import ProxmoxAPI
