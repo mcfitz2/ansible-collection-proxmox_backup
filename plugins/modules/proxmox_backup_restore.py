@@ -1,7 +1,7 @@
 #!/usr/bin/python
-
-from ansible.module_utils.basic import AnsibleModule
-from proxmoxer import ProxmoxAPI, ResourceException
+# Copyright: (c) 2020, Fuochi <devopsarr@gmail.com>
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+from __future__ import (absolute_import, division, print_function)
 
 __metaclass__ = type
 
@@ -107,6 +107,10 @@ tags:
     elements: int
     sample: [1,2]
 '''
+
+from ansible.module_utils.basic import AnsibleModule
+#from proxmoxer import ProxmoxAPI, ResourceException
+
 def main():
     module = AnsibleModule(
         argument_spec=dict(
@@ -119,19 +123,20 @@ def main():
             vmid=dict(type='int', default=None, required=False)
         )
     )
-    storage = module.params['storage']
-    node = module.params['node']
-    vmid = module.params['vmid']
-    proxmox = ProxmoxAPI(module.params['api_host'],
-                         user=module.params['api_user'],
-                         password=module.params['api_password'],
-                         verify_ssl=module.params['verify_ssl'])
+    # storage = module.params['storage']
+    # node = module.params['node']
+    # vmid = module.params['vmid']
+    # proxmox = ProxmoxAPI(module.params['api_host'],
+    #                      user=module.params['api_user'],
+    #                      password=module.params['api_password'],
+    #                      verify_ssl=module.params['verify_ssl'])
 
-    try:
-        module.exit_json(changed=False)
+    # try:
+    #     module.exit_json(changed=False)
 
-    except ResourceException as e:
-        module.fail_json(msg=f"A Proxmox error occurred: {str(e)}")
-
+    # except ResourceException as e:
+    #     module.fail_json(msg=f"A Proxmox error occurred: {str(e)}")
+    module.exit_json(changed=False)
+    
 if __name__ == '__main__':
     main()

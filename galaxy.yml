@@ -7,7 +7,7 @@ version: 0.1.0
 readme: README.md
 authors:
   - Micah Fitzgerald (github.com/mcfitz2)
-description: null
+description: Collection for backing up and restoring Proxmox resources
 license_file: LICENSE
 tags:
 # tags so people can search for collections https://galaxy.ansible.com/search

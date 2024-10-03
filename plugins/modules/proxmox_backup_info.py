@@ -1,7 +1,7 @@
 #!/usr/bin/python
-
-from ansible.module_utils.basic import AnsibleModule
-from proxmoxer import ProxmoxAPI, ResourceException
+# Copyright: (c) 2020, Fuochi <devopsarr@gmail.com>
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+from __future__ import (absolute_import, division, print_function)
 
 __metaclass__ = type
 
@@ -88,6 +88,9 @@ backups:
     returned: always
     type: list
 '''
+
+from ansible.module_utils.basic import AnsibleModule
+from proxmoxer import ProxmoxAPI, ResourceException
 
 def run_module():
     module = AnsibleModule(
