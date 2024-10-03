@@ -8,54 +8,49 @@ __metaclass__ = type
 
 DOCUMENTATION = r'''
 ---
-module: proxmox_backup_info
+module: proxmox_backup_restore
 
-short_description: Get backup information from Proxmox.
+short_description: Restore a Proxmox LXC/VM from backup
 
 version_added: "0.1.0"
 
-description: Get backup information from Proxmox.
+description: Restore a Proxmox LXC/VM from backup
 
 options:
     api_host:
-        description: API Host.
-        required: true
+        description:
+        - Specify the target host of the Proxmox VE cluster.
         type: str
+        required: true
+    api_port:
+        description:
+        - Specify the target port of the Proxmox VE cluster.
+        - Uses the E(PROXMOX_PORT) environment variable if not specified.
+        type: int
+        required: false
+        version_added: 9.1.0
     api_user:
-        description: U
+        description:
+        - Specify the user to authenticate with.
+        type: str
+        required: true
+    api_password:
+        description:
+        - Specify the password to authenticate with.
+        - You can use E(PROXMOX_PASSWORD) environment variable.
+        type: str
+    verify_ssl:
+        description:
+        - If V(false), SSL certificates will not be validated.
+        - This should only be used on personally controlled sites using self-signed certificates.
+        type: bool
+        default: false
+    node:
+        description: Proxmox node that you wish to query
         required: true
         type: str
-    specifications:
-        description: Specification list.
-        type: list
-        elements: dict
-        suboptions:
-            negate:
-                description: Negate flag.
-                type: bool
-            required:
-                description: Required flag.
-                type: bool
-            name:
-                description: Specification name.
-                type: str
-            implementation:
-                description: Implementation.
-                type: str
-            fields:
-                description: Configuration field list.
-                type: list
-                elements: dict
-                suboptions:
-                    name:
-                        description: Field name.
-                        type: str
-                    value:
-                        description: Field value.
-                        type: raw
 
-extends_documentation_fragment:
-    - mcfitz2.proxmox
+requirements: [ "proxmoxer", "requests" ]
 
 author:
     - Micah Fitzgerald (@mcfitz2)

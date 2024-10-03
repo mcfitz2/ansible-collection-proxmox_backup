@@ -19,44 +19,48 @@ description: Get backup information from Proxmox.
 
 options:
     api_host:
-        description: API Host.
-        required: true
+        description:
+        - Specify the target host of the Proxmox VE cluster.
         type: str
+        required: true
+    api_port:
+        description:
+        - Specify the target port of the Proxmox VE cluster.
+        - Uses the E(PROXMOX_PORT) environment variable if not specified.
+        type: int
+        required: false
+        version_added: 9.1.0
     api_user:
-        description: U
+        description:
+        - Specify the user to authenticate with.
+        type: str
+        required: true
+    api_password:
+        description:
+        - Specify the password to authenticate with.
+        - You can use E(PROXMOX_PASSWORD) environment variable.
+        type: str
+    verify_ssl:
+        description:
+        - If V(false), SSL certificates will not be validated.
+        - This should only be used on personally controlled sites using self-signed certificates.
+        type: bool
+        default: false
+    node:
+        description: Proxmox node that you wish to query
         required: true
         type: str
-    specifications:
-        description: Specification list.
-        type: list
-        elements: dict
-        suboptions:
-            negate:
-                description: Negate flag.
-                type: bool
-            required:
-                description: Required flag.
-                type: bool
-            name:
-                description: Specification name.
-                type: str
-            implementation:
-                description: Implementation.
-                type: str
-            fields:
-                description: Configuration field list.
-                type: list
-                elements: dict
-                suboptions:
-                    name:
-                        description: Field name.
-                        type: str
-                    value:
-                        description: Field value.
-                        type: raw
+    vmid: 
+        description: VMID of the VM/Container you wish to filter by
+        required: false
+        type: int
+    storage:
+        description: Storage identifier e.g. "local" or "all"
+        choices: ['all', 'storage']
+        required: false
+        default: 'all'
 
-extends_documentation_fragment:
-    - mcfitz2.proxmox
+requirements: [ "proxmoxer", "requests" ]
 
 author:
     - Micah Fitzgerald (@mcfitz2)
@@ -65,54 +69,26 @@ author:
 EXAMPLES = r'''
 ---
 # Create a auto tag
-- name: Create a auto tag
-  devopsarr.sonarr.sonarr_auto_tag:
-    remove_tags_automatically: false
-    name: "Type"
-    tags: [1]
-    specifications:
-    - name: "anime"
-      implementation: "SeriesTypeSpecification"
-      negate: false
-      required: true
-      fields:
-      - name: "value"
-        value: 2
-
-# Delete a auto tag
-- name: Delete a auto tag
-  devopsarr.sonarr.sonarr_auto_tag:
-    name: Example
-    state: absent
+- name: Get backups for VMID 701 accross all data stores
+  mcfitz2.proxmox_backup:
+    api_user: root@pam
+    api_password: 1q2w3e
+    api_host: node1
+    vmid: 701
+    node: pve-node
+    
 '''
 
 RETURN = r'''
 # These are examples of possible return values, and in general should use other names for return values.
-id:
-    description: auto tagID.
-    type: int
+latest:
+    description: Newest backup from results
+    type: dict
     returned: always
-    sample: 1
-name:
-    description: Name.
+backups:
+    description: List of backups
     returned: always
-    type: str
-    sample: "Example"
-remove_tags_automatically:
-    description: Remove tags automatically flag.
-    returned: always
-    type: bool
-    sample: false
-specifications:
-    description: specification list.
     type: list
-    returned: always
-tags:
-    description: Tag list.
-    type: list
-    returned: always
-    elements: int
-    sample: [1,2]
 '''
 
 def run_module():
@@ -122,7 +98,7 @@ def run_module():
             api_user=dict(type='str', required=True),
             api_password=dict(type='str', required=True, no_log=True),
             node=dict(type='str', required=True),
-            storage=dict(type='str', required=True),
+            storage=dict(type='str', required=False, default='all'),
             verify_ssl=dict(type='bool', default=True),
             vmid=dict(type='int', default=None, required=False)
         )
