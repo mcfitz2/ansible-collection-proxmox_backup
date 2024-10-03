@@ -2,6 +2,9 @@
 # Copyright: (c) 2020, Fuochi <devopsarr@gmail.com>
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 from __future__ import (absolute_import, division, print_function)
+from ansible.module_utils.basic import missing_required_lib
+import traceback
+from ansible.module_utils.basic import AnsibleModule
 
 __metaclass__ = type
 
@@ -89,8 +92,6 @@ backups:
     type: list
 '''
 
-from ansible.module_utils.basic import AnsibleModule
-import traceback
 
 PROXMOXER_IMP_ERR = None
 try:
@@ -102,7 +103,6 @@ except ImportError:
     HAS_PROXMOXER = False
     PROXMOXER_IMP_ERR = traceback.format_exc()
 
-from ansible.module_utils.basic import missing_required_lib
 
 def run_module():
     module = AnsibleModule(
@@ -117,7 +117,8 @@ def run_module():
         )
     )
     if not HAS_PROXMOXER:
-        module.fail_json(msg=missing_required_lib('proxmoxer'), exception=PROXMOXER_IMP_ERR)
+        module.fail_json(msg=missing_required_lib(
+            'proxmoxer'), exception=PROXMOXER_IMP_ERR)
     storage = module.params['storage']
     node = module.params['node']
     vmid = module.params['vmid']
@@ -128,20 +129,23 @@ def run_module():
 
     try:
         if storage == 'all':
-            storages = [s['storage'] for s in proxmox.nodes(node).storage.get(content="backup")]
+            storages = [s['storage']
+                        for s in proxmox.nodes(node).storage.get(content="backup")]
         else:
             storages = [storage]
         backups = []
         for stor in storages:
             backups.extend([backup
                             for backup in
-                                proxmox.nodes(node).storage(stor).content.get(content='backup')
+                            proxmox.nodes(node).storage(
+                                stor).content.get(content='backup')
                             if (vmid and vmid == backup['vmid']) or not vmid])
         backups.sort(key=lambda x: x['ctime'], reverse=True)
         module.exit_json(changed=False, latest=backups[0], backups=backups)
 
     except ResourceException as e:
         module.fail_json(msg=f"A Proxmox error occurred: {str(e)}")
+
 
 def main():
     run_module()

@@ -2,6 +2,9 @@
 # Copyright: (c) 2020, Fuochi <devopsarr@gmail.com>
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 from __future__ import (absolute_import, division, print_function)
+from ansible.module_utils.basic import missing_required_lib
+import traceback
+from ansible.module_utils.basic import AnsibleModule
 
 __metaclass__ = type
 
@@ -108,8 +111,6 @@ tags:
     sample: [1,2]
 '''
 
-from ansible.module_utils.basic import AnsibleModule
-import traceback
 
 PROXMOXER_IMP_ERR = None
 try:
@@ -121,7 +122,7 @@ except ImportError:
     HAS_PROXMOXER = False
     PROXMOXER_IMP_ERR = traceback.format_exc()
 
-from ansible.module_utils.basic import missing_required_lib
+
 def main():
     module = AnsibleModule(
         argument_spec=dict(
@@ -136,7 +137,8 @@ def main():
         )
     )
     if not HAS_PROXMOXER:
-        module.fail_json(msg=missing_required_lib('proxmoxer'), exception=PROXMOXER_IMP_ERR)
+        module.fail_json(msg=missing_required_lib(
+            'proxmoxer'), exception=PROXMOXER_IMP_ERR)
     storage = module.params['storage']
     node = module.params['node']
     vmid = module.params['vmid']
@@ -158,6 +160,7 @@ def main():
 
     except ResourceException as e:
         module.fail_json(msg=f"A Proxmox error occurred: {str(e)}")
+
 
 if __name__ == '__main__':
     main()
