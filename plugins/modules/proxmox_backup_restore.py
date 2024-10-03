@@ -140,14 +140,14 @@ def main():
             node=dict(type='str', required=True),
             storage=dict(type='str', required=True),
             verify_ssl=dict(type='bool', default=True),
-            vmid=dict(type='int', default=None, required=False)
+            vmid=dict(type='int', required=True)
         ),
         supports_check_mode=True
     )
     if not HAS_PROXMOXER:
         module.fail_json(msg=missing_required_lib(
             'proxmoxer'), exception=PROXMOXER_IMP_ERR)
-        
+
     result = dict(
         changed=False,
         original_message='',

@@ -55,9 +55,9 @@ options:
         type: int
     storage:
         description: Storage identifier e.g. "local" or "all"
-        choices: ['all', 'storage']
         required: false
         default: 'all'
+        type: str
 
 requirements: [ "proxmoxer" ]
 
@@ -119,7 +119,7 @@ def run_module():
     if not HAS_PROXMOXER:
         module.fail_json(msg=missing_required_lib(
             'proxmoxer'), exception=PROXMOXER_IMP_ERR)
-        
+
     result = dict(
         changed=False,
         original_message='',
@@ -128,7 +128,7 @@ def run_module():
 
     if module.check_mode:
         module.exit_json(**result)
-        
+
     storage = module.params['storage']
     node = module.params['node']
     vmid = module.params['vmid']
