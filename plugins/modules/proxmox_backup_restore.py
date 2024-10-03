@@ -114,9 +114,8 @@ tags:
 
 PROXMOXER_IMP_ERR = None
 try:
-    from proxmoxer import ProxmoxAPI
-    from proxmoxer import ResourceException
-    from proxmoxer import __version__ as proxmoxer_version
+    # from proxmoxer import ProxmoxAPI
+    # from proxmoxer import ResourceException
     HAS_PROXMOXER = True
 except ImportError:
     HAS_PROXMOXER = False
