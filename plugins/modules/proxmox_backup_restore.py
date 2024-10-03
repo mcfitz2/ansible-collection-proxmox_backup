@@ -27,7 +27,7 @@ options:
         - Uses the E(PROXMOX_PORT) environment variable if not specified.
         type: int
         required: false
-        version_added: 9.1.0
+        default: 8006
     api_user:
         description:
         - Specify the user to authenticate with.
@@ -49,6 +49,14 @@ options:
         description: Proxmox node that you wish to query
         required: true
         type: str
+    storage:
+        description: Data store that holds the desired backup
+        required: true
+        type: str
+    vmid:
+        description: VMID of VM/LXC to restore
+        type: int
+        required: true
 
 requirements: [ "proxmoxer" ]
 
@@ -109,9 +117,9 @@ tags:
     sample: [1,2]
 '''
 
-from ansible.module_utils.basic import missing_required_lib
-import traceback
-from ansible.module_utils.basic import AnsibleModule
+from ansible.module_utils.basic import missing_required_lib  # noqa: E402
+import traceback  # noqa: E402
+from ansible.module_utils.basic import AnsibleModule  # noqa: E402
 PROXMOXER_IMP_ERR = None
 try:
     # from proxmoxer import ProxmoxAPI
@@ -133,11 +141,21 @@ def main():
             storage=dict(type='str', required=True),
             verify_ssl=dict(type='bool', default=True),
             vmid=dict(type='int', default=None, required=False)
-        )
+        ),
+        supports_check_mode=True
     )
     if not HAS_PROXMOXER:
         module.fail_json(msg=missing_required_lib(
             'proxmoxer'), exception=PROXMOXER_IMP_ERR)
+        
+    result = dict(
+        changed=False,
+        original_message='',
+        message=''
+    )
+
+    if module.check_mode:
+        module.exit_json(**result)
     # storage = module.params['storage']
     # node = module.params['node']
     # vmid = module.params['vmid']
