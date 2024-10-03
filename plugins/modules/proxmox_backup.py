@@ -37,6 +37,7 @@ options:
         type: str
         required: true
     api_password:
+        required: true
         description:
         - Specify the password to authenticate with.
         - You can use E(PROXMOX_PASSWORD) environment variable.
@@ -46,12 +47,18 @@ options:
         - If V(false), SSL certificates will not be validated.
         - This should only be used on personally controlled sites using self-signed certificates.
         type: bool
-        default: false
+        default: true
     node:
         description: Proxmox node that you wish to query
         required: true
         type: str
-
+    storage:
+        description: Storage identifier e.g. "local" or "all"
+        required: true
+    vmid:
+        description: VMID of the VM/Container you wish to filter by
+        required: true
+        type: int
 requirements: [ "proxmoxer" ]
 
 author:
@@ -128,6 +135,7 @@ def main():
             api_host=dict(type='str', required=True),
             api_user=dict(type='str', required=True),
             api_password=dict(type='str', required=True, no_log=True),
+            api_port=dict(type='int', required=False, default=8006),
             node=dict(type='str', required=True),
             storage=dict(type='str', required=True),
             verify_ssl=dict(type='bool', default=True),
