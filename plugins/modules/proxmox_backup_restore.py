@@ -124,8 +124,6 @@ except ImportError:
 from ansible.module_utils.basic import missing_required_lib
 
 def main():
-    if not HAS_PROXMOXER:
-            module.fail_json(msg=missing_required_lib('proxmoxer'), exception=PROXMOXER_IMP_ERR)
     module = AnsibleModule(
         argument_spec=dict(
             api_host=dict(type='str', required=True),
@@ -137,6 +135,8 @@ def main():
             vmid=dict(type='int', default=None, required=False)
         )
     )
+    if not HAS_PROXMOXER:
+        module.fail_json(msg=missing_required_lib('proxmoxer'), exception=PROXMOXER_IMP_ERR)
     # storage = module.params['storage']
     # node = module.params['node']
     # vmid = module.params['vmid']
@@ -151,6 +151,6 @@ def main():
     # except ResourceException as e:
     #     module.fail_json(msg=f"A Proxmox error occurred: {str(e)}")
     module.exit_json(changed=False)
-    
+
 if __name__ == '__main__':
     main()
