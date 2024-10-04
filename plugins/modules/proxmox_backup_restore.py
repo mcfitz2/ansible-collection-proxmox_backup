@@ -140,9 +140,9 @@ def main():
             backup=dict(type='str', required=True),
             verify_ssl=dict(type='bool', default=True),
             vmid=dict(type='int', required=True),
-            bandwidth_limit=dict(type='int', default=None),
-            storage=dict(type='str', default=None),
-            unique=dict(type='bool', default=False),
+            bandwidth_limit=dict(type='int', default=None, required=False),
+            storage=dict(type='str', default=None, required=False),
+            unique=dict(type='bool', default=False, required=False),
             start_after_restore=dict(type='bool', default=False),
             wait=dict(type='bool', default=False, required=False),
             override=dict(type="dict", options=dict(
