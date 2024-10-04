@@ -56,7 +56,7 @@ options:
     backup:
         description: Backup to restore
         required: true
-        type: strf
+        type: str
     bandwidth_limit:
         description: Override I/O bandwidth limit (in KiB/s).
         type: int
@@ -80,26 +80,22 @@ options:
         default: false
         required: false
         type: bool
-    
     override:
-        elements: dict
+        type: dict
+        description: Override VM/LXC config from backup
         suboptions:
             unprivileged:
                 description: Makes the container run as unprivileged user. Defaults to value in backup
                 type: bool
-                required: false
             hostname:
                 description: Override the VM/LXC hostname. Defaults to value in backup
                 type: str
-                required: false
             memory:
                 description: Override amount of memory (in MB) assigned to the VM/LXC. Defaults to value in backup
                 type: int
-                required: false
             cores:
                 description: Override number of cores assigned to the VM/LXC. Defaults to value in backup
                 type: int
-                required: false
 
 requirements: [ "proxmoxer" ]
 
