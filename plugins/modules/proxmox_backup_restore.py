@@ -186,9 +186,9 @@ def main():
             except ResourceException as e:
                 module.fail_json(msg=f"Unable to determine resource type: {str(e)}")
         if resource_type == 'lxc':
-            upid = proxmox.nodes(node).lxc.post(vmid=vmid, ostemplate=backup, node=node, restore=True)
+            upid = proxmox.nodes(node).lxc.post(vmid=vmid, ostemplate=backup, node=node, restore="true")
         elif resource_type == 'qemu':
-            upid = proxmox.nodes(node).qemu.post(vmid=vmid, ostemplate=backup, node=node, restore=True)
+            upid = proxmox.nodes(node).qemu.post(vmid=vmid, ostemplate=backup, node=node, restore="true")
         module.exit_json(changed=True, task_id=upid)
 
     except ResourceException as e:
