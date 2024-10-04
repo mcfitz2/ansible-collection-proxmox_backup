@@ -178,7 +178,7 @@ def main():
             status = proxmox.nodes(node).tasks(task_id).status.get()
             while status['status'] == 'running':
                 status = proxmox.nodes(node).tasks(task_id).status.get()
-        module.exit_json(changed=False, task_id=task_id, status=status)
+        module.exit_json(changed=True, task_id=task_id, status=status)
 
     except ResourceException as e:
         module.fail_json(msg=f"A Proxmox error occurred: {str(e)}")

@@ -81,8 +81,8 @@ options:
         required: false
         type: bool
     override:
-        type: dict
         description: Override VM/LXC config from backup
+        type: dict
         suboptions:
             unprivileged:
                 description: Makes the container run as unprivileged user. Defaults to value in backup
@@ -145,11 +145,11 @@ def main():
             unique=dict(type='bool', default=False),
             start_after_restore=dict(type='bool', default=False),
             wait=dict(type='bool', default=False, required=False),
-            override=dict(
-                privileged=dict(type='str', default=None),
+            override=dict(type="dict", options=dict(
+                unprivileged=dict(type='str', default=None),
                 hostname=dict(type='str', default=None),
                 memory=dict(type='int', default=None),
-                cores=dict(type='int', default=None)
+                cores=dict(type='int', default=None))
             )
         ),
         supports_check_mode=True
