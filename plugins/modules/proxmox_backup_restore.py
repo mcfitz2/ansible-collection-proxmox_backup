@@ -146,7 +146,7 @@ def main():
             start_after_restore=dict(type='bool', default=False),
             wait=dict(type='bool', default=False, required=False),
             override=dict(type="dict", options=dict(
-                unprivileged=dict(type='str', default=None),
+                unprivileged=dict(type='bool', default=None),
                 hostname=dict(type='str', default=None),
                 memory=dict(type='int', default=None),
                 cores=dict(type='int', default=None))
