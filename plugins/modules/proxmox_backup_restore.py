@@ -75,6 +75,12 @@ options:
         required: false
         default: false
         type: bool
+    wait:
+        description: If true, poll Proxmox until backup is complete/failed
+        default: false
+        required: false
+        type: bool
+    
     override:
         elements: dict
         suboptions:
@@ -107,7 +113,11 @@ EXAMPLES = r'''
 
 RETURN = r'''
 # These are examples of possible return values, and in general should use other names for return values.
-
+task_id:
+    description: UPID of restore task
+    type: str
+    returned: always
+    sample: UPID
 '''
 
 from ansible.module_utils.basic import missing_required_lib  # noqa: E402
@@ -138,6 +148,7 @@ def main():
             storage=dict(type='str', default=None),
             unique=dict(type='bool', default=False),
             start_after_restore=dict(type='bool', default=False),
+            wait=dict(type='bool', default=False, required=False),
             override=dict(
                 privileged=dict(type='str', default=None),
                 hostname=dict(type='str', default=None),
@@ -179,10 +190,10 @@ def main():
             except ResourceException as e:
                 module.fail_json(msg=f"Unable to determine resource type: {str(e)}")
         if resource_type == 'lxc':
-            proxmox.nodes(node).lxc.post(vmid=vmid, ostemplate=backup, node=node)
+            upid = proxmox.nodes(node).lxc.post(vmid=vmid, ostemplate=backup, node=node)
         elif resource_type == 'qemu':
-            proxmox.nodes(node).qemu.post(vmid=vmid, ostemplate=backup, node=node)
-        module.exit_json(changed=False)
+            upid = proxmox.nodes(node).qemu.post(vmid=vmid, ostemplate=backup, node=node)
+        module.exit_json(changed=True, task_id=upid)
 
     except ResourceException as e:
         module.fail_json(msg=f"A Proxmox error occurred: {str(e)}")
