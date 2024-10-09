@@ -39,5 +39,6 @@
         ansible-galaxy collection build
       changed_when: true
     - name: Publish the collection.
-      command: >
+      ansible.builtin.command: >
         ansible-galaxy collection publish ./mcfitz2-proxmox_backup-{{ tag }}.tar.gz
+      changed_when: true

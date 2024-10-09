@@ -12,4 +12,4 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Uninstall GitHub Actions' built-in Homebrew.
-        run: ansible-playbook -i 'localhost,' deploy.yml -e "tag=${{ github.ref_name }}"
+        run: ansible-playbook -i 'localhost,' ci/deploy.yml -e "tag=${{ github.ref_name }}"
