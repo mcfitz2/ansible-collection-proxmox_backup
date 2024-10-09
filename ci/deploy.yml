@@ -30,15 +30,17 @@
   tasks:
     - name: Ensure the galaxy.yml tag is up to date.
       ansible.builtin.lineinfile:
-        path: galaxy.yml
+        path: ../galaxy.yml
         regexp: "^version:"
         line: 'version: "{{ tag }}"'
 
     - name: Build the collection.
       ansible.builtin.command: >
         ansible-galaxy collection build
+        chdir=../
       changed_when: true
     - name: Publish the collection.
       ansible.builtin.command: >
         ansible-galaxy collection publish ./mcfitz2-proxmox_backup-{{ tag }}.tar.gz
+        chdir=../
       changed_when: true
