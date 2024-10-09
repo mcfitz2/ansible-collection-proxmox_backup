@@ -138,6 +138,7 @@ except ImportError:
     HAS_PROXMOXER = False
     PROXMOXER_IMP_ERR = traceback.format_exc()
 
+
 def stop_resource(proxmox, module, resource_type):
     node = module.params['node']
     vmid = module.params['vmid']
@@ -166,6 +167,7 @@ def stop_resource(proxmox, module, resource_type):
                                                                                 node=node)
                     poll_task(proxmox, node, upid_stop)
 
+
 def poll_task(proxmox, node, upid):
     status = proxmox.nodes(node).tasks(upid).status.get()
     while status['status'] == 'running':
@@ -176,6 +178,8 @@ def poll_task(proxmox, node, upid):
                                 content=f"{status['exitstatus']}")
     else:
         return status
+
+
 def main():
     module = AnsibleModule(
         argument_spec=dict(

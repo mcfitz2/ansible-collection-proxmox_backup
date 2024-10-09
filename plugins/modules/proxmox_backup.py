@@ -134,15 +134,19 @@ except ImportError:
     HAS_PROXMOXER = False
     PROXMOXER_IMP_ERR = traceback.format_exc()
 
+
 def poll_task(proxmox, node, upid):
     status = proxmox.nodes(node).tasks(upid).status.get()
     while status['status'] == 'running':
         status = proxmox.nodes(node).tasks(upid).status.get()
     if status['exitstatus'] != 'OK':
-        raise ResourceException(status_code=500, status_message="Task failed", content=f"{status['exitstatus']}")
+        raise ResourceException(status_code=500,
+                                status_message="Task failed",
+                                content=f"{status['exitstatus']}")
     else:
         return status
-    
+
+
 def main():
     module = AnsibleModule(
         argument_spec=dict(
