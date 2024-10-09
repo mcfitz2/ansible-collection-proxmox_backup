@@ -41,4 +41,3 @@
     - name: Publish the collection.
       command: >
         ansible-galaxy collection publish ./mcfitz2-proxmox_backup-{{ tag }}.tar.gz
-
