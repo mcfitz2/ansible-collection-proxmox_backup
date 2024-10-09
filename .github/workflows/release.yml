@@ -14,3 +14,9 @@ jobs:
 
       - name: Publish collection
         run: ansible-playbook -i 'localhost,' ci/deploy.yml -e "tag=${{ github.ref_name }}"
+      - name: Add galaxy.yml
+        run: git add galaxy.yml
+      - name: Commit galaxy.yml change
+        run: git commit -m "Updated galaxy version to ${{ github.ref_name }}"
+      - name: Push to main
+        run: git push origin main
