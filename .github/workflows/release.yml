@@ -6,10 +6,11 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
-
+    env:
+      ANSIBLE_GALAXY_TOKEN: ${{ secrets.ANSIBLE_GALAXY_TOKEN }}
     steps:
       - name: Check out the codebase.
         uses: actions/checkout@v2
 
-      - name: Uninstall GitHub Actions' built-in Homebrew.
+      - name: Publish collection
         run: ansible-playbook -i 'localhost,' ci/deploy.yml -e "tag=${{ github.ref_name }}"
