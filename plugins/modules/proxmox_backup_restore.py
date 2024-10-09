@@ -80,6 +80,16 @@ options:
         default: false
         required: false
         type: bool
+    hard_stop:
+        description: Execute a stop operation if VM/LXC is running
+        default: false
+        required: false
+        type: bool
+    try_hard_stop:
+        description: Execute a stop operation if the shutdown operation fails
+        default: false
+        required: false
+        type: bool
     override:
         description: Override VM/LXC config from backup
         type: dict
