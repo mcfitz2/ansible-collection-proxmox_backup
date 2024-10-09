@@ -14,9 +14,10 @@ jobs:
 
       - name: Publish collection
         run: ansible-playbook -i 'localhost,' ci/deploy.yml -e "tag=${{ github.ref_name }}"
-      - name: Add galaxy.yml
-        run: git add galaxy.yml
-      - name: Commit galaxy.yml change
-        run: git commit -m "Updated galaxy version to ${{ github.ref_name }}"
-      - name: Push to main
-        run: git push origin main
+      - uses: EndBug/add-and-commit@v9
+        with:
+          add: 'galaxy.yml'
+          default_author: github_actor
+          fetch: false
+          message: 'Updating galaxy.yml version to ${{ github.ref_name }}'
+          push: true
