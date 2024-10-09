@@ -1,0 +1,44 @@
+---
+- hosts: localhost
+  name: Publish
+  connection: local
+  gather_facts: false
+
+  vars:
+    # This should be set via the command line at runtime.
+    tag: ''
+
+  pre_tasks:
+    - name: Ensure the ANSIBLE_GALAXY_TOKEN environment variable is set.
+      ansible.builtin.fail:
+        msg: ANSIBLE_GALAXY_TOKEN is not set.
+      when: "lookup('env', 'ANSIBLE_GALAXY_TOKEN') == ''"
+
+    - name: Ensure the ~/.ansible directory exists.
+      ansible.builtin.file:
+        path: ~/.ansible
+        state: directory
+        mode: "0700"
+
+    - name: Write the Galaxy token to ~/.ansible/galaxy_token
+      ansible.builtin.copy:
+        content: |
+          token: {{ lookup('env', 'ANSIBLE_GALAXY_TOKEN') }}
+        dest: ~/.ansible/galaxy_token
+        mode: "0644"
+
+  tasks:
+    - name: Ensure the galaxy.yml tag is up to date.
+      ansible.builtin.lineinfile:
+        path: galaxy.yml
+        regexp: "^version:"
+        line: 'version: "{{ tag }}"'
+
+    - name: Build the collection.
+      ansible.builtin.command: >
+        ansible-galaxy collection build
+      changed_when: true
+    - name: Publish the collection.
+      command: >
+        ansible-galaxy collection publish ./mcfitz2-proxmox_backup-{{ tag }}.tar.gz
+

@@ -1,0 +1,15 @@
+on:
+  push:
+    tags:
+    - '*'
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the codebase.
+        uses: actions/checkout@v2
+
+      - name: Uninstall GitHub Actions' built-in Homebrew.
+        run: ansible-playbook -i 'localhost,' deploy.yml -e "tag=${{ github.ref_name }}"
