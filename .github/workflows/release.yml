@@ -1,7 +1,8 @@
-on:
-  push:
-    tags:
-    - '*'
+---
+name: Release and Deploy collection
+on: # yamllint disable-line rule:truthy
+  workflow_dispatch:
+
 jobs:
   release:
     name: Release
@@ -9,16 +10,13 @@ jobs:
     env:
       ANSIBLE_GALAXY_TOKEN: ${{ secrets.ANSIBLE_GALAXY_TOKEN }}
     steps:
+
       - name: Check out the codebase.
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+
+      - name: Get current version
+        id: cversion
+        run: echo "::set-output name=version::$(grep version galaxy.yml | awk -F'"' '{ print $2 }')"
+
       - name: Publish collection
-        run: ansible-playbook -i 'localhost,' ci/deploy.yml -e "tag=${{ github.ref_name }}"
-      - uses: EndBug/add-and-commit@v9
-        with:
-          add: 'galaxy.yml'
-          default_author: github_actor
-          fetch: false
-          message: 'Updating galaxy.yml version to ${{ github.ref_name }}'
-          push: true
+        run: ansible-playbook -i 'localhost,' ci/deploy.yml -e "tag=${{ steps.cversion.outputs.version }}"
