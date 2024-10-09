@@ -134,7 +134,15 @@ except ImportError:
     HAS_PROXMOXER = False
     PROXMOXER_IMP_ERR = traceback.format_exc()
 
-
+def poll_task(proxmox, node, upid):
+    status = proxmox.nodes(node).tasks(upid).status.get()
+    while status['status'] == 'running':
+        status = proxmox.nodes(node).tasks(upid).status.get()
+    if status['exitstatus'] != 'OK':
+        raise ResourceException(status_code=500, status_message="Task failed", content=f"{status['exitstatus']}")
+    else:
+        return status
+    
 def main():
     module = AnsibleModule(
         argument_spec=dict(
@@ -172,13 +180,11 @@ def main():
 
     try:
 
-        task_id = proxmox.nodes(node).vzdump.post(vmid=vmid, storage=storage)
+        upid = proxmox.nodes(node).vzdump.post(vmid=vmid, storage=storage)
         status = None
         if wait:
-            status = proxmox.nodes(node).tasks(task_id).status.get()
-            while status['status'] == 'running':
-                status = proxmox.nodes(node).tasks(task_id).status.get()
-        module.exit_json(changed=True, task_id=task_id, status=status)
+            status = poll_task(proxmox, node, upid)
+        module.exit_json(changed=True, upid=upid, status=status)
 
     except ResourceException as e:
         module.fail_json(msg=f"A Proxmox error occurred: {str(e)}")

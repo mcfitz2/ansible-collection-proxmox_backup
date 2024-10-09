@@ -128,7 +128,44 @@ except ImportError:
     HAS_PROXMOXER = False
     PROXMOXER_IMP_ERR = traceback.format_exc()
 
+def stop_resource(proxmox, module, resource_type):
+    node = module.params['node']
+    vmid = module.params['vmid']
+    if resource_type == 'lxc':
+        if module.params['hard_stop']:
+            upid_stop = proxmox.nodes(node).lxc(vmid).status.stop.post(vmid=vmid, node=node)
+        else:
+            try:
+                upid_stop = proxmox.nodes(node).lxc(vmid).status.shutdown.post(vmid=vmid, node=node)
+                poll_task(proxmox, node, upid_stop)
+            except ResourceException:
+                if module.params['try_hard_stop']:
+                    upid_stop = proxmox.nodes(node).lxc(vmid).status.stop.post(vmid=vmid, node=node)
+                    poll_task(proxmox, node, upid_stop)
+    elif resource_type == 'qemu':
+        if module.params['hard_stop']:
+            upid_stop = proxmox.nodes(node).qemu(vmid).status.stop.post(vmid=vmid, node=node)
+        else:
+            try:
+                upid_stop = proxmox.nodes(node).qemu(vmid).status.shutdown.post(vmid=vmid,
+                                                                                node=node)
+                poll_task(proxmox, node, upid_stop)
+            except ResourceException:
+                if module.params['try_hard_stop']:
+                    upid_stop = proxmox.nodes(node).qemu(vmid).status.stop.post(vmid=vmid,
+                                                                                node=node)
+                    poll_task(proxmox, node, upid_stop)
 
+def poll_task(proxmox, node, upid):
+    status = proxmox.nodes(node).tasks(upid).status.get()
+    while status['status'] == 'running':
+        status = proxmox.nodes(node).tasks(upid).status.get()
+    if status['exitstatus'] != 'OK':
+        raise ResourceException(status_code=500,
+                                status_message="Task failed",
+                                content=f"{status['exitstatus']}")
+    else:
+        return status
 def main():
     module = AnsibleModule(
         argument_spec=dict(
@@ -145,6 +182,8 @@ def main():
             unique=dict(type='bool', default=False, required=False),
             start_after_restore=dict(type='bool', default=False),
             wait=dict(type='bool', default=False, required=False),
+            hard_stop=dict(type='bool', default=False, required=False),
+            try_hard_stop=dict(type='bool', default=False, required=False),
             override=dict(type="dict", options=dict(
                 unprivileged=dict(type='bool', default=None),
                 hostname=dict(type='str', default=None),
@@ -169,6 +208,8 @@ def main():
     backup = module.params['backup']
     node = module.params['node']
     vmid = module.params['vmid']
+    wait = module.params['wait']
+    start_after_restore = '1' if module.params['start_after_restore'] else '0'
     proxmox = ProxmoxAPI(module.params['api_host'],
                          user=module.params['api_user'],
                          password=module.params['api_password'],
@@ -181,15 +222,28 @@ def main():
             resource_type = 'lxc'
         except ResourceException:
             try:
-                proxmox.nodes(node).lxc(vmid).get()
+                proxmox.nodes(node).qemu(vmid).get()
                 resource_type = 'qemu'
             except ResourceException as e:
                 module.fail_json(msg=f"Unable to determine resource type: {str(e)}")
+        stop_resource(proxmox, module, resource_type)
         if resource_type == 'lxc':
-            upid = proxmox.nodes(node).lxc.post(vmid=vmid, ostemplate=backup, node=node, restore="1")
+            upid = proxmox.nodes(node).lxc.post(vmid=vmid,
+                                                ostemplate=backup,
+                                                node=node,
+                                                restore='1',
+                                                force='1',
+                                                start=start_after_restore)
         elif resource_type == 'qemu':
-            upid = proxmox.nodes(node).qemu.post(vmid=vmid, ostemplate=backup, node=node, restore="1")
-        module.exit_json(changed=True, task_id=upid)
+            upid = proxmox.nodes(node).qemu.post(vmid=vmid,
+                                                 archive=backup,
+                                                 node=node,
+                                                 force='1',
+                                                 start=start_after_restore)
+        status = None
+        if wait:
+            poll_task(proxmox, node, upid)
+        module.exit_json(changed=True, task_id=upid, status=status)
 
     except ResourceException as e:
         module.fail_json(msg=f"A Proxmox error occurred: {str(e)}")
